@@ -1,0 +1,15 @@
+{
+  "name": "2-movies-node-application-exercise",
+  "version": "1.0.0",
+  "description": "Register and rate movies",
+  "main": "index.js",
+  "scripts": {
+    "start": "node ./src/server.js"
+  },
+  "keywords": [],
+  "author": "Leonard",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
