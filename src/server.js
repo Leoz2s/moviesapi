@@ -5,7 +5,7 @@ const express = require("express");
 const app = express();
 app.use(express.json());
 
-const database = require("./database/sqlite/index.js");
+const migrationsRun = require("./database/migrations");
 
 const routes = require("./routes");
 
@@ -30,4 +30,4 @@ app.use((error, request, response, next) => {
   });
 });
 
-database();
+migrationsRun();
