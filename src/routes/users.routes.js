@@ -14,5 +14,6 @@ function myMiddleware(request, response, next) {
 // usersRoutes.use(myMiddleware); // For all routes
 
 usersRoutes.post("/", myMiddleware, usersController.create);
+usersRoutes.put("/:id", usersController.update);
 
 module.exports = usersRoutes;
