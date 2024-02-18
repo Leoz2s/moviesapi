@@ -9,9 +9,9 @@ class UsersController {
     const {name, email, password} = request.body;
 
     const database = await sqliteConnection();
+
     const checkUserExists = await database.get(
       "SELECT name FROM users WHERE email = (?)", [email]);
-
     if(checkUserExists) {
       throw new AppError("This e-mail is already in use.")
     };
