@@ -5,13 +5,11 @@ const knex = require("../database/knex");
 
 class MoviesController {
   async create(request, response) {
-    const {user_id} = request.params;
+    const user_id = request.user.id;
     const {title, description, rating, tags} = request.body;
 
     const database = await sqliteConnection();
 
-    console.log(title)
-    if(title) {console.log('hello')}
     if(!title && (description || rating || tags)) {
       throw new AppError("Title is obligatory to register a movie.");
     }else if(title) {
@@ -50,7 +48,8 @@ class MoviesController {
   };
 
   async index(request, response) {
-    const {title, tags, user_id} = request.query;
+    const user_id = request.user.id;
+    const {title, tags} = request.query;
 
     let movies;
 

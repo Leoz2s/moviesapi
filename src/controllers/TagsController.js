@@ -10,7 +10,8 @@ class TagsController {
   };
 
   async index(request, response) {
-    const {user_id, filter_tags} = request.query;
+    const {user_id} = request.user.id;
+    const {filter_tags} = request.query;
 
     let userTags;
 

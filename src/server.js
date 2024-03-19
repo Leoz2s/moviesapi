@@ -5,6 +5,12 @@ const express = require("express");
 const app = express();
 app.use(express.json());
 
+const uploadConfig = require("./configs/upload");
+app.use("/files", express.static(uploadConfig.UPLOADS_FOLDER));
+
+const cors = require("cors");
+app.use(cors());
+
 const migrationsRun = require("./database/migrations");
 
 const routes = require("./routes");
