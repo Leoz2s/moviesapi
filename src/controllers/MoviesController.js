@@ -13,7 +13,7 @@ class MoviesController {
     if(!title && (description || rating || tags)) {
       throw new AppError("Title is obligatory to register a movie.");
     }else if(title) {
-      const checkMovieExists = await database.get("SELECT title FROM movies WHERE title = ?", [title]);
+      const checkMovieExists = await database.get("SELECT title FROM movies WHERE user_id = ? AND title = ?", [user_id, title]);
       if(checkMovieExists) {
         throw new AppError("Movie already registered.");
       };
@@ -25,15 +25,17 @@ class MoviesController {
       title, description, rating, user_id
     });
 
-    const tagsInsert = tags.map(name => {
-      return {
-        movie_id,
-        user_id,
-        name
-      };
-    });
+    if(tags == true) {
+      const tagsInsert = tags.map(name => {
+        return {
+          movie_id,
+          user_id,
+          name
+        };
+      });
 
-    await knex("tags").insert(tagsInsert);
+      await knex("tags").insert(tagsInsert);
+    };
 
     response.status(201).json({title, description, rating, tags, user_id});
   };
@@ -66,15 +68,20 @@ class MoviesController {
         .whereLike("movies.title", `%${title}%`)
         .whereIn("name", filteredTags)
         .innerJoin("movies", "movies.id", "tags.movie_id")
+        .groupBy("movies.id")
         .orderBy("movies.title");
         // Repetition of movies shown because a movie has multiple tags.
 
-    } else {
+    }else if(title) {
       // const movies = await database.get("SELECT * FROM movies WHERE user_id = ?", [user_id]);
       movies = await knex("movies")
         .where({user_id})
         .whereLike("title", `%${title}%`)
         .orderBy("title");
+    }else {
+      movies = await knex("movies")
+        .where({user_id})
+        .orderBy("title")
     };
 
     const userTags = await knex("tags").where({user_id});

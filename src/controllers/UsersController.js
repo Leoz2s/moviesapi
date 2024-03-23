@@ -29,9 +29,9 @@ class UsersController {
   };
 
   async update(request, response) {
-    const {name, email, password, old_password} = request.body;
+    const {name, email, old_password, password} = request.body;
     const user_id = request.user.id;
-    const changesMessage = [];
+    let changesMessage = [];
 
     const database = await sqliteConnection();
 
@@ -41,12 +41,10 @@ class UsersController {
     };
 
     if(name) {
-      if(user.name == name) {
-        throw new AppError("This is already your Username");
+      if(user.name !== name) {
+        user.name = name ?? user.name;
+        changesMessage = [...changesMessage, `Name changed.`];
       };
-
-      // user.name = name;
-      changesMessage[0] = `Name changed.`;
     };
 
     if(email){
@@ -54,12 +52,11 @@ class UsersController {
       
       if(userWithUpdatedEmail && userWithUpdatedEmail.id !== user.id) {
         throw new AppError("This e-mail is already in use.");
-      }else if(userWithUpdatedEmail) {
-        throw new AppError("This is already your e-mail.");
-      };
 
-      // user.email= email;
-      changesMessage[1] = `E-mail changed.`;
+      }else if(!userWithUpdatedEmail) {
+        user.email = email ?? user.email;
+        changesMessage = [...changesMessage, `E-mail changed.`];
+      };
     };
 
     if(!old_password && password) {
@@ -71,23 +68,19 @@ class UsersController {
 
         if(!checkOldPassword){
           throw new AppError("Actual password is wrong.");
+        }else {
+          user.password = await hash(password, 8);
+          changesMessage = [...changesMessage, `Password changed.`];
         };
-    
-        // user.password = await hash(password, 8);
-        // changesMessage[2] = `Password changed.`;
       };
-
-    user.name = name ?? user.name;
-    user.email = email ?? user.email;
-    if(password) {user.password = await hash(password, 8);
-      changesMessage[2] = `Password changed.`;
-    };
 
     await database.run(`
       UPDATE users SET
       name = (?), email = (?), password = (?), 
       updated_at = DATETIME('now')
-      WHERE id = (?)`, [user.name, user.email, user.password, user.id]);
+      WHERE id = (?)`, 
+      [user.name, user.email, user.password,
+      user.id]);
     
     return response.status(200).json({changesMessage, user});
   };

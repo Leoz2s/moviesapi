@@ -13,11 +13,10 @@ app.use(cors());
 
 const migrationsRun = require("./database/migrations");
 
-const routes = require("./routes");
-
 const PORT = 3333;
 app.listen(PORT, () => console.log(`Server is running on Port ${PORT}`));
 
+const routes = require("./routes");
 app.use(routes);
 
 app.use((error, request, response, next) => {
