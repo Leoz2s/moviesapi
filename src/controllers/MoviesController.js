@@ -10,9 +10,9 @@ class MoviesController {
 
     const database = await sqliteConnection();
 
-    if(!title && (description || rating || tags)) {
+    if(!title) {
       throw new AppError("Title is obligatory to register a movie.");
-    }else if(title) {
+    }else {
       const checkMovieExists = await database.get("SELECT title FROM movies WHERE user_id = ? AND title = ?", [user_id, title]);
       if(checkMovieExists) {
         throw new AppError("Movie already registered.");
@@ -103,6 +103,37 @@ class MoviesController {
     await knex("movies").where({id: movie_id}).delete();
 
     return response.status(200).json(`Movie of ID ${movie_id} was deleted successfully.`);
+  };
+
+  async update(request, response) {
+    const user_id = request.user.id;
+    const {title, rating, description, tags, movie_id} = request.body;
+
+    if(!title) {
+      throw new AppError("The title is needed to update a movie.");
+    } else {
+      const checkMovieExists = await knex("movies").where({id: movie_id}).first();
+      if(!checkMovieExists) {
+        throw new AppError("Movie not found.");
+      };
+      
+      const {id} = checkMovieExists;
+      await knex("movies").update({title, rating, description}).where({id, user_id});
+
+      if(tags) {
+        const tagsInserted = tags.map(tag => {
+          return {
+            movie_id,
+            user_id,
+            name: tag,
+          };
+        });
+        await knex("tags").where({movie_id, user_id}).delete();
+        await knex("tags").insert(tagsInserted);
+      };
+
+      return response.status(200).json(`Movie updated with success.`);
+    };
   };
 };
 
