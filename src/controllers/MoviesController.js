@@ -120,7 +120,8 @@ class MoviesController {
       const {id} = checkMovieExists;
       await knex("movies").update({title, rating, description}).where({id, user_id});
 
-      if(tags) {
+      if(tags == true) {
+        console.log(tags)
         const tagsInserted = tags.map(tag => {
           return {
             movie_id,
@@ -128,6 +129,7 @@ class MoviesController {
             name: tag,
           };
         });
+        console.log(tagsInserted)
         await knex("tags").where({movie_id, user_id}).delete();
         await knex("tags").insert(tagsInserted);
       };
